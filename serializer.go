@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/olianate/serializer/formatter"
+	"github.com/olianate/go-serializer/formatter"
 )
 
 type Serializable interface {
