@@ -9,13 +9,12 @@ func startWithSupperCase(values string) bool {
 	return false
 }
 
-func firstNotEmpty(values ...string) (string, int) {
-
-	for i, s := range values {
-		if s != "" {
-			return s, i
+func orString(elments ...string) string {
+	for _, e := range elments {
+		if e != "" {
+			return e
 		}
 	}
 
-	return "", -1
+	return ""
 }

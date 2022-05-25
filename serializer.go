@@ -8,51 +8,48 @@ import (
 	"github.com/olianate/go-serializer/formatter"
 )
 
-type Serializable interface {
-	Serializer() interface{}
-}
-
-func Serialize(item interface{}) interface{} {
-
-	t := reflect.TypeOf(item)
-	v := reflect.ValueOf(item)
-
-	if t.Implements(reflect.TypeOf((*json.Marshaler)(nil)).Elem()) {
-		return item
+func Serialize(data interface{}) interface{} {
+	if data == nil {
+		return data
+	}
+	v := reflect.ValueOf(data)
+	if v.IsZero() {
+		return data
 	}
 
-	if v.IsZero() {
-		return item
+	t := reflect.TypeOf(data)
+	// return value if implemented json.Marshaler
+	if t.Implements(reflect.TypeOf((*json.Marshaler)(nil)).Elem()) {
+		return data
 	}
 
 	switch t.Kind() {
 	case reflect.Ptr:
 		return Serialize(v.Elem().Interface())
+
 	case reflect.Struct:
 		valuesMap := make(map[string]interface{})
-		numOfFields := t.NumField()
-		for i := 0; i < numOfFields; i++ {
-			// format in tag
 
-			tag := t.Field(i).Tag
-
-			jsontag := strings.Split(tag.Get("json"), ",")
-
-			fieldname := t.Field(i).Name
-			if !startWithSupperCase(fieldname) {
+		numOfFilelds := t.NumField()
+		for i := 0; i < numOfFilelds; i++ {
+			fieldName := t.Field(i).Name
+			if !startWithSupperCase(fieldName) {
 				continue
 			}
 
-			if len(jsontag) > 0 {
-				if jsontag[0] == "-" {
+			tag := t.Field(i).Tag
+			jsonTag := strings.Split(tag.Get("json"), ",")
+
+			if len(jsonTag) > 0 {
+				if jsonTag[0] == "-" {
 					continue
 				}
-				fieldname, _ = firstNotEmpty(jsontag[0], fieldname)
+				fieldName = orString(jsonTag[0], fieldName)
 			}
 
-			format := tag.Get("format")
+			f := tag.Get("format")
 			var retval interface{}
-			if formatter, ok := formatter.Formatters[format]; ok {
+			if formatter, ok := formatter.Formatters[f]; ok {
 				retval = formatter(v.Field(i).Interface())
 			} else {
 				retval = Serialize(v.Field(i).Interface())
@@ -62,8 +59,8 @@ func Serialize(item interface{}) interface{} {
 				for key, val := range retmap {
 					valuesMap[key] = val
 				}
-			} else if !(reflect.ValueOf(retval).IsZero() && len(jsontag) > 1 && jsontag[1] == "omitempty") {
-				valuesMap[fieldname] = retval
+			} else if !(reflect.ValueOf(retval).IsZero() && len(jsonTag) > 1 && jsonTag[1] == "omitempty") {
+				valuesMap[fieldName] = retval
 			}
 
 		}
@@ -78,8 +75,9 @@ func Serialize(item interface{}) interface{} {
 		}
 
 		return res
+
 	default:
-		return item
+		return data
 
 	}
 
