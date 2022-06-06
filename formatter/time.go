@@ -4,7 +4,7 @@ import "time"
 
 func init() {
 	RegisterFormatter("datetime", TimeFormatter("2006-01-02 15:04:05"))
-	RegisterFormatter("time", TimeFormatter("2006-01-02"))
+	RegisterFormatter("time", TimeFormatter("15:04:05"))
 	RegisterFormatter("date", TimeFormatter("2006-01-02"))
 }
 
