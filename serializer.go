@@ -59,7 +59,7 @@ func Serialize(data interface{}) interface{} {
 				for key, val := range retmap {
 					valuesMap[key] = val
 				}
-			} else if !(reflect.ValueOf(retval).IsZero() && len(jsonTag) > 1 && jsonTag[1] == "omitempty") {
+			} else if !((retval == nil || reflect.ValueOf(retval).IsZero()) && len(jsonTag) > 1 && jsonTag[1] == "omitempty") {
 				valuesMap[fieldName] = retval
 			}
 
